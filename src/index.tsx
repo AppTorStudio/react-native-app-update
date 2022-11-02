@@ -24,3 +24,7 @@ export function multiply(a: number, b: number): Promise<number> {
 export function getAppUpdateInfo(): Promise<any> {
   return AppUpdate.getAppUpdateInfo();
 }
+
+export function openAppStore(): Promise<any> {
+  return AppUpdate.openAppStore();
+}

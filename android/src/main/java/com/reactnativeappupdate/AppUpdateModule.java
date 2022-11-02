@@ -2,10 +2,12 @@ package com.reactnativeappupdate;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 
 
@@ -69,12 +71,20 @@ public class AppUpdateModule extends ReactContextBaseJavaModule {
     }
 
 
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    public void multiply(double a, double b, Promise promise) {
-        promise.resolve(a * b);
+
+  @ReactMethod
+  public void openAppStore(Promise promise) {
+    String packageName = this.getReactApplicationContext().getPackageName();
+    Intent launchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+    try {
+      getCurrentActivity().startActivity(launchIntent);
+    } catch (ActivityNotFoundException ex) {
+      launchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
+      getCurrentActivity().startActivity(launchIntent);
     }
+    promise.resolve("");
+  }
+
 
   @ReactMethod
   public void getAppUpdateInfo(Promise promise) {
@@ -89,20 +99,21 @@ public class AppUpdateModule extends ReactContextBaseJavaModule {
           promise.reject(ERROR_GET_APP_INFO_FAILED);
           return;
         }
-       /* JSObject ret = new JSObject();
-        ret.put("currentVersion", String.valueOf(pInfo.versionCode));
-        ret.put("availableVersion", String.valueOf(appUpdateInfo.availableVersionCode()));
-        ret.put("updateAvailability", appUpdateInfo.updateAvailability());
-        ret.put("updatePriority", appUpdateInfo.updatePriority());
-        ret.put("immediateUpdateAllowed", appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE));
-        ret.put("flexibleUpdateAllowed", appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE));
+
+        WritableMap ret = Arguments.createMap();
+        ret.putString("currentVersion", String.valueOf(pInfo.versionCode));
+        ret.putString("availableVersion", String.valueOf(appUpdateInfo.availableVersionCode()));
+        ret.putInt("updateAvailability", appUpdateInfo.updateAvailability());
+        ret.putInt("updatePriority", appUpdateInfo.updatePriority());
+        ret.putBoolean("immediateUpdateAllowed", appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE));
+        ret.putBoolean("flexibleUpdateAllowed", appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE));
         Integer clientVersionStalenessDays = appUpdateInfo.clientVersionStalenessDays();
         if (clientVersionStalenessDays != null) {
-          ret.put("clientVersionStalenessDays", clientVersionStalenessDays);
+          ret.putInt("clientVersionStalenessDays", clientVersionStalenessDays);
         }
-        ret.put("installStatus", appUpdateInfo.installStatus());
-        call.resolve(ret);*/
-        promise.resolve("work");
+        ret.putInt("installStatus", appUpdateInfo.installStatus());
+
+        promise.resolve(ret);
       }
     );
     appUpdateInfoTask.addOnFailureListener(
