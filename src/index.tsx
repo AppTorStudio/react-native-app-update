@@ -20,3 +20,7 @@ const AppUpdate = NativeModules.AppUpdate
 export function multiply(a: number, b: number): Promise<number> {
   return AppUpdate.multiply(a, b);
 }
+
+export function getAppUpdateInfo(): Promise<any> {
+  return AppUpdate.getAppUpdateInfo();
+}
